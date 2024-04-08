@@ -1,0 +1,193 @@
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        #gameCanvas {
+            border: 2px solid #000;
+        }
+
+        /* Style for the snake */
+        .snake {
+            fill: green;
+        }
+
+        /* Style for the food */
+        .food {
+            fill: red;
+        }
+
+        /* Style for the buttons */
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+  <h2 style="display: grid;align-items: center;">snake game </h2>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div>
+        <button id="startButton">Start</button>
+        <button id="stopButton">Stop</button>
+        <label for="speedRange">Speed:</label>
+        <input type="range" id="speedRange" min="50" max="500" value="100" step="50">
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById("gameCanvas");
+            const ctx = canvas.getContext("2d");
+            let gameInterval; // To store the game interval
+
+            // Game constants
+            const GRID_SIZE = 20;
+            const CANVAS_SIZE = canvas.width;
+            let SNAKE_SPEED = 100; // milliseconds (initial speed)
+
+            // Initial game state
+            let snake = [{x: 10, y: 10}];
+            let food = generateFoodPosition();
+            let dx = 1; // initial direction
+            let dy = 0;
+            let score = 0;
+
+            // Main game loop
+            function startGame() {
+                gameInterval = setInterval(update, SNAKE_SPEED);
+            }
+
+            function stopGame() {
+                clearInterval(gameInterval);
+            }
+
+            // Event listener for start button
+            document.getElementById("startButton").addEventListener("click", startGame);
+
+            // Event listener for stop button
+            document.getElementById("stopButton").addEventListener("click", stopGame);
+
+            // Event listener for keypresses
+            document.addEventListener("keydown", changeDirection);
+
+            // Event listener for speed range input
+            document.getElementById("speedRange").addEventListener("input", function() {
+                SNAKE_SPEED = parseInt(this.value);
+                if (gameInterval) {
+                    clearInterval(gameInterval);
+                    startGame();
+                }
+            });
+
+            function update() {
+                clearCanvas();
+                moveSnake();
+                drawSnake();
+                drawFood();
+                checkCollision();
+            }
+
+            function clearCanvas() {
+                ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+            }
+
+            function moveSnake() {
+                const head = {x: snake[0].x + dx, y: snake[0].y + dy};
+                snake.unshift(head);
+                if (head.x === food.x && head.y === food.y) {
+                    // Snake eats the food
+                    score++;
+                    food = generateFoodPosition();
+                } else {
+                    // Remove tail segment if snake didn't eat food
+                    snake.pop();
+                }
+            }
+
+            function drawSnake() {
+                snake.forEach(segment => {
+                    ctx.fillStyle = "#00ff00"; // green color
+                    ctx.fillRect(segment.x * GRID_SIZE, segment.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+                });
+            }
+
+            function drawFood() {
+                ctx.fillStyle = "#ff0000"; // red color
+                ctx.fillRect(food.x * GRID_SIZE, food.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+            }
+
+            function generateFoodPosition() {
+                return {
+                    x: Math.floor(Math.random() * (CANVAS_SIZE / GRID_SIZE)),
+                    y: Math.floor(Math.random() * (CANVAS_SIZE / GRID_SIZE))
+                };
+            }
+
+            function checkCollision() {
+                // Check if snake hits the wall
+                if (snake[0].x < 0 || snake[0].x >= CANVAS_SIZE / GRID_SIZE || snake[0].y < 0 || snake[0].y >= CANVAS_SIZE / GRID_SIZE) {
+                    gameOver();
+                }
+
+                // Check if snake hits itself
+                for (let i = 1; i < snake.length; i++) {
+                    if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) {
+                        gameOver();
+                    }
+                }
+            }
+
+            function changeDirection(event) {
+                const LEFT_KEY = 37;
+                const RIGHT_KEY = 39;
+                const UP_KEY = 38;
+                const DOWN_KEY = 40;
+
+                const keyPressed = event.keyCode;
+
+                if (keyPressed === LEFT_KEY && dx === 0) {
+                    dx = -1;
+                    dy = 0;
+                }
+                if (keyPressed === RIGHT_KEY && dx === 0) {
+                    dx = 1;
+                    dy = 0;
+                }
+                if (keyPressed === UP_KEY && dy === 0) {
+                    dx = 0;
+                    dy = -1;
+                }
+                if (keyPressed === DOWN_KEY && dy === 0) {
+                    dx = 0;
+                    dy = 1;
+                }
+            }
+
+            function gameOver() {
+                clearInterval(gameInterval);
+                alert("Game Over! Your score: " + score);
+                window.location.reload();
+            }
+        });
+    </script><br>
+    <br>
+    <br><br>
+    <br>
+    <br>
+    <br>
+    <footer>This game is created by Ajay Kumar Mahto</footer>
+</body>
+</html>
